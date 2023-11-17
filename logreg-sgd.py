@@ -14,6 +14,7 @@ import sklearn.model_selection
 import sklearn.linear_model
 import sklearn.preprocessing
 from random import randint as rd
+from functools import cmp_to_key
 
 
 def load_train_test_data(train_ratio=0.5):
@@ -25,8 +26,10 @@ def load_train_test_data(train_ratio=0.5):
     # X = numpy.hstack((numpy.ones((X.shape[0],1)), X))
     y = numpy.asarray(data["y"])
 
+    random_state = rd(0, 4294967295)
+    # random_state = 0
     return sklearn.model_selection.train_test_split(
-        X, y, test_size=1 - train_ratio, random_state=rd(0, 4294967295)
+        X, y, test_size=1 - train_ratio, random_state=random_state
     )
 
 
@@ -74,6 +77,11 @@ def logreg_sgd(X, y, alpha=0.001, epochs=10000, eps=1e-4):
 def predict_prob(X, theta):
     return 1.0 / (1 + numpy.exp(-numpy.dot(X, theta)))
 
+def cmp(x, y):
+    if x[0] != y[0]:
+        return 1 if x[0] > y[0] else -1
+    else:
+        return 1 if x[1] > y[1] else -1
 
 def plot_roc_curve(y_test, y_prob):
     # TODO: compute tpr and fpr of different thresholds
@@ -103,7 +111,7 @@ def plot_roc_curve(y_test, y_prob):
     plt.gca().set_aspect("equal", adjustable="box")
     plt.savefig("roc_curve.png")
     # calculate AUC
-    fpr, tpr = zip(*sorted(zip(fpr, tpr), key=lambda x: x[0]))
+    fpr, tpr = zip(*sorted(zip(fpr, tpr), key=cmp_to_key(cmp)))
     nfpr, ntpr = [], []
     last = -1.0
     for i in range(len(fpr)):
