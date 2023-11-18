@@ -65,9 +65,9 @@ def logreg_sgd(X, y, alpha=0.001, epochs=10000, eps=1e-4):
             theta = theta - alpha * grandient
         if (numpy.abs(theta - old_theta) >= eps).sum() == 0:
             break
+        if _ % 1000 == 0:
+            print(f"epoch: {_}, loss: {cross_entropy(y, predict_prob(X, theta))} theda_diff_num: {(numpy.abs(theta - old_theta) >= eps).sum()}")
         old_theta = copy.deepcopy(theta)
-        if _ % 100 == 0:
-            print(f"epoch: {_}, loss: {cross_entropy(y, predict_prob(X, theta))}")
 
     return theta
 
@@ -126,7 +126,7 @@ def main(argv):
     X_train, X_test, y_train, y_test = load_train_test_data(train_ratio=0.5)
     X_train_scale, X_test_scale = scale_features(X_train, X_test, 0, 1)
 
-    theta = logreg_sgd(X_train_scale, y_train, epochs=1000)
+    theta = logreg_sgd(X_train_scale, y_train)
     print("")
     print(theta)
     y_prob = predict_prob(X_train_scale, theta)
