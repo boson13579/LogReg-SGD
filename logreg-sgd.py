@@ -27,7 +27,7 @@ def load_train_test_data(train_ratio=0.5):
     y = numpy.asarray(data["y"])
 
     random_state = rd(0, 4294967295)
-    # random_state = 0
+    random_state = 0
     return sklearn.model_selection.train_test_split(
         X, y, test_size=1 - train_ratio, random_state=random_state
     )
@@ -57,20 +57,19 @@ def logreg_sgd(X, y, alpha=0.001, epochs=10000, eps=1e-4):
 
     n, d = X.shape
     theta = numpy.zeros((d, 1))
-    lessthan_eps = 0
+    old_theta = numpy.zeros((d, 1))
 
-    for i in range(epochs):
-        xi, yi = X[i % n], y[i % n]
-        y_hat = predict_prob(xi, theta)
-        grandient = numpy.dot(xi.reshape(d, 1), (y_hat - yi).reshape(1, 1))
-        theta = theta - alpha * grandient
-        if cross_entropy([yi], y_hat) < eps:
-            if lessthan_eps == 0:
-                lessthan_eps = 1
-            else:
-                break
-        else:
-            lessthan_eps = 0
+    for _ in range(epochs):
+        for i in range(n):
+            y_hat = predict_prob(X[i], theta)
+            grandient = numpy.dot(X[i].reshape(d, 1), (y_hat - y[i]).reshape(1, 1))
+            theta = theta - alpha * grandient
+        if (numpy.abs(theta - old_theta) >= eps).sum() == 0:
+            break
+        old_theta = copy.deepcopy(theta)
+        if _ % 100 == 0:
+            print(f"epoch: {_}, loss: {cross_entropy(y, predict_prob(X, theta))}")
+
     return theta
 
 
@@ -128,10 +127,11 @@ def main(argv):
     X_train, X_test, y_train, y_test = load_train_test_data(train_ratio=0.5)
     X_train_scale, X_test_scale = scale_features(X_train, X_test, 0, 1)
 
-    theta = logreg_sgd(X_train_scale, y_train, epochs=100000)
+    theta = logreg_sgd(X_train_scale, y_train, epochs=1000)
+    print("")
     print(theta)
     y_prob = predict_prob(X_train_scale, theta)
-    threadhold = 0.18
+    threadhold = 0.5
     print(
         "Logreg train accuracy: %f"
         % (sklearn.metrics.accuracy_score(y_train, y_prob > threadhold))
