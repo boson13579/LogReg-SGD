@@ -22,8 +22,7 @@ def load_train_test_data(train_ratio=0.5):
         "./HTRU_2.csv", header=None, names=["x%i" % (i) for i in range(8)] + ["y"]
     )
     X = numpy.asarray(data[["x%i" % (i) for i in range(8)]])
-    # I can't understand what the following line does, so I just commented it out.
-    # X = numpy.hstack((numpy.ones((X.shape[0],1)), X))
+    X = numpy.hstack((numpy.ones((X.shape[0],1)), X))
     y = numpy.asarray(data["y"])
 
     random_state = rd(0, 4294967295)
