@@ -101,7 +101,7 @@ def plot_roc_curve(y_test, y_prob):
         else:
             fp += 1
         tpr.append(tp / fn)
-        fpr.append(fp / (i + 1))
+        fpr.append(fp / tn)
 
     plt.plot(fpr, tpr)
     plt.xlabel("FPR")
